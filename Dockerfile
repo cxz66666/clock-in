@@ -1,7 +1,7 @@
 FROM python:3.8
 
 WORKDIR /app
-RUN apt-get update && apt-get install libgl1
+RUN apt-get update && apt-get install libgl1 -y
 
 
 RUN pip install --no-cache-dir requests datetime schedule ddddocr
