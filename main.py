@@ -1,3 +1,5 @@
+from logging import error
+from traceback import print_tb
 import requests
 import re
 import json
@@ -211,161 +213,175 @@ class HealthCheckInHelper(ZJULogin):
                     return
             except:
                 print('验证码识别失败')
+                raise Exception("验证码识别失败")
         except:
-            print('打卡网页获取失败')
-        finally:
-            new_info_tmp = json.loads(re.findall(r'def = ({[^\n]+})', html)[0])
-            new_id = new_info_tmp['id']
-            new_uid = new_info_tmp['uid']
-            # 拼凑geo信息
-            lng, lat = address_component.get(
-                "streetNumber").get("location").split(",")
-            geo_api_info_dict = {"type": "complete", "info": "SUCCESS", "status": 1,
-                                 "position": {"Q": lat, "R": lng, "lng": lng, "lat": lat},
-                                 "message": "Get geolocation success.Convert Success.Get address success.", "location_type": "ip",
-                                 "accuracy": "null", "isConverted": "true", "addressComponent": address_component,
-                                 "formattedAddress": formatted_address, "roads": [], "crosses": [], "pois": []}
-            #print('打卡地点：', formatted_address)
-            # 拿到校验值
-            verify_data = re.findall(
-                r'"([a-z0-9]*?)": "([0-9]*?)","([a-z0-9]*?)":"([a-z0-9]*?)"', html)[0]
-            verify_code = {
-                verify_data[0]: verify_data[1],
-                verify_data[2]: verify_data[3],
-            }
-            data = {
-                'sfymqjczrj': '0',
-                'zjdfgj': '',
-                'sfyrjjh': '0',
-                'cfgj': '',
-                'tjgj': '',
-                'nrjrq': '0',
-                'rjka': '',
-                'jnmddsheng': '',
-                'jnmddshi': '',
-                'jnmddqu': '',
-                'jnmddxiangxi': '',
-                'rjjtfs': '',
-                'rjjtfs1': '',
-                'rjjtgjbc': '',
-                'jnjtfs': '',
-                'jnjtfs1': '',
-                'jnjtgjbc': '',
-                # 是否确认信息属实
-                'sfqrxxss': '1',
-                'sfqtyyqjwdg': '0',
-                'sffrqjwdg': '0',
-                'sfhsjc': '',
-                'zgfx14rfh': '0',
-                'zgfx14rfhdd': '',
-                'sfyxjzxgym': '1',
-                # 是否不宜接种人群
-                'sfbyjzrq': '5',
-                'jzxgymqk': '6',  # 这里是第三针相关参数，1是已接种第一针，4是已接种第二针（已满6个月），5是已接种第二针（未满6个月），6是已接种第三针，3是未接种，记得自己改
-                'tw': '0',
-                'sfcxtz': '0',
-                'sfjcbh': '0',
-                'sfcxzysx': '0',
-                'jcjg': '',
-                'qksm': '',
-                'sfyyjc': '0',
-                'jcjgqr': '0',
-                'remark': '',
-                'address': formatted_address,
-                # {"type":"complete","position":{"Q":30.30975640191,"R":120.085647515191,"lng":120.085648,"lat":30.309756},"location_type":"html5","message":"Get geolocation success.Convert Success.Get address success.","accuracy":40,"isConverted":true,"status":1,"addressComponent":{"citycode":"0571","adcode":"330106","businessAreas":[],"neighborhoodType":"","neighborhood":"","building":"","buildingType":"","street":"龙宇街","streetNumber":"17-18号","country":"中国","province":"浙江省","city":"杭州市","district":"西湖区","towncode":"330106109000","township":"三墩镇"},"formattedAddress":"浙江省杭州市西湖区三墩镇翠柏浙江大学(紫金港校区)","roads":[],"crosses":[],"pois":[],"info":"SUCCESS"}
-                'geo_api_info': geo_api_info_dict,
-                # 浙江省 杭州市 西湖区
-                # '\u6D59\u6C5F\u7701 \u676D\u5DDE\u5E02 \u897F\u6E56\u533A'
-                'area': "{} {} {}".format(address_component.get("province"), address_component.get("city"),
-                                          address_component.get("district")),
-                # 浙江省
-                # '\u6D59\u6C5F\u7701'
-                'province': address_component.get("province"),
-                # 杭州市
-                # '\u676D\u5DDE\u5E02'
-                'city': address_component.get("city"),
-                # 是否在校：在校将'sfzx'改为1
-                'sfzx': '1',
-                'sfjcwhry': '0',
-                'sfjchbry': '0',
-                'sfcyglq': '0',
-                'gllx': '',
-                'glksrq': '',
-                'jcbhlx': '',
-                'jcbhrq': '',
-                'bztcyy': '4',
-                'sftjhb': '0',
-                'sftjwh': '0',
-                'fjsj':	'0',
-                'sfjcqz': '',
-                'jcqzrq': '',
-                'jrsfqzys': '',
-                'jrsfqzfy': '',
-                'sfyqjzgc': '',
-                # 是否申领杭州健康码
-                'sfsqhzjkk': '1',
-                # 杭州健康吗颜色，1:绿色 2:红色 3:黄色
-                'sqhzjkkys': '1',
-                'gwszgzcs': '',
-                'szgj': '',
-                'fxyy': '',
-                'jcjg': '',
-                # uid每个用户不一致
-                'uid': new_uid,
-                # id每个用户不一致
-                'id': new_id,
-                # 日期
-                'date': get_date(),
-                'created': round(time.time()),
-                'szsqsfybl': '0',
-                'sfygtjzzfj': '0',
-                'gtjzzfjsj': '',
-                'gwszdd': '',
-                'szgjcs': '',
-                'ismoved': '0',  # 位置变化为1，不变为0
-                'zgfx14rfhsj': '',
-                'jrdqjcqk': '',
-                'jcwhryfs': '',
-                'jchbryfs': '',
-                'xjzd': '',
-                'sfsfbh': '0',
-                'jhfjrq': '',
-                'jhfjjtgj': '',
-                'jhfjhbcc': '',
-                'jhfjsftjwh': '0',
-                'jhfjsftjhb': '0',
-                'szsqsfybl': '0',
-                'gwszgz': '',
-                'campus': '紫金港校区',  # 紫金港校区 玉泉校区 西溪校区 华家池校区 之江校区 海宁校区 舟山校区 宁波校区 工程师学院 杭州国际科创中心 其他
-                # 👇-----2022.5.7日修改-----👇
-                'verifyCode': code,
-                # 👆-----2022.5.7日修改-----👆
-            }
-            data.update(verify_code)
-            response = self.sess.post('https://healthreport.zju.edu.cn/ncov/wap/default/save', data=data,
-                                      headers=self.headers)
-            return response.json()
+            print('发生异常')
+            raise Exception("发生异常")
 
+        new_info_tmp = json.loads(re.findall(r'def = ({[^\n]+})', html)[0])
+        new_id = new_info_tmp['id']
+        new_uid = new_info_tmp['uid']
+        # 拼凑geo信息
+        lng, lat = address_component.get(
+            "streetNumber").get("location").split(",")
+        geo_api_info_dict = {"type": "complete", "info": "SUCCESS", "status": 1,
+                                "position": {"Q": lat, "R": lng, "lng": lng, "lat": lat},
+                                "message": "Get geolocation success.Convert Success.Get address success.", "location_type": "ip",
+                                "accuracy": "null", "isConverted": "true", "addressComponent": address_component,
+                                "formattedAddress": formatted_address, "roads": [], "crosses": [], "pois": []}
+        #print('打卡地点：', formatted_address)
+        # 拿到校验值
+        verify_data = re.findall(
+            r'"([a-z0-9]*?)": "([0-9]*?)","([a-z0-9]*?)":"([a-z0-9]*?)"', html)[0]
+        verify_code = {
+            verify_data[0]: verify_data[1],
+            verify_data[2]: verify_data[3],
+        }
+        data = {
+            'sfymqjczrj': '0',
+            'zjdfgj': '',
+            'sfyrjjh': '0',
+            'cfgj': '',
+            'tjgj': '',
+            'nrjrq': '0',
+            'rjka': '',
+            'jnmddsheng': '',
+            'jnmddshi': '',
+            'jnmddqu': '',
+            'jnmddxiangxi': '',
+            'rjjtfs': '',
+            'rjjtfs1': '',
+            'rjjtgjbc': '',
+            'jnjtfs': '',
+            'jnjtfs1': '',
+            'jnjtgjbc': '',
+            # 是否确认信息属实
+            'sfqrxxss': '1',
+            'sfqtyyqjwdg': '0',
+            'sffrqjwdg': '0',
+            'sfhsjc': '',
+            'zgfx14rfh': '0',
+            'zgfx14rfhdd': '',
+            'sfyxjzxgym': '1',
+            # 是否不宜接种人群
+            'sfbyjzrq': '5',
+            'jzxgymqk': '6',  # 这里是第三针相关参数，1是已接种第一针，4是已接种第二针（已满6个月），5是已接种第二针（未满6个月），6是已接种第三针，3是未接种，记得自己改
+            'tw': '0',
+            'sfcxtz': '0',
+            'sfjcbh': '0',
+            'sfcxzysx': '0',
+            'jcjg': '',
+            'qksm': '',
+            'sfyyjc': '0',
+            'jcjgqr': '0',
+            'remark': '',
+            'address': formatted_address,
+            # {"type":"complete","position":{"Q":30.30975640191,"R":120.085647515191,"lng":120.085648,"lat":30.309756},"location_type":"html5","message":"Get geolocation success.Convert Success.Get address success.","accuracy":40,"isConverted":true,"status":1,"addressComponent":{"citycode":"0571","adcode":"330106","businessAreas":[],"neighborhoodType":"","neighborhood":"","building":"","buildingType":"","street":"龙宇街","streetNumber":"17-18号","country":"中国","province":"浙江省","city":"杭州市","district":"西湖区","towncode":"330106109000","township":"三墩镇"},"formattedAddress":"浙江省杭州市西湖区三墩镇翠柏浙江大学(紫金港校区)","roads":[],"crosses":[],"pois":[],"info":"SUCCESS"}
+            'geo_api_info': geo_api_info_dict,
+            # 浙江省 杭州市 西湖区
+            # '\u6D59\u6C5F\u7701 \u676D\u5DDE\u5E02 \u897F\u6E56\u533A'
+            'area': "{} {} {}".format(address_component.get("province"), address_component.get("city"),
+                                        address_component.get("district")),
+            # 浙江省
+            # '\u6D59\u6C5F\u7701'
+            'province': address_component.get("province"),
+            # 杭州市
+            # '\u676D\u5DDE\u5E02'
+            'city': address_component.get("city"),
+            # 是否在校：在校将'sfzx'改为1
+            'sfzx': '1',
+            'sfjcwhry': '0',
+            'sfjchbry': '0',
+            'sfcyglq': '0',
+            'gllx': '',
+            'glksrq': '',
+            'jcbhlx': '',
+            'jcbhrq': '',
+            'bztcyy': '4',
+            'sftjhb': '0',
+            'sftjwh': '0',
+            'fjsj':	'0',
+            'sfjcqz': '',
+            'jcqzrq': '',
+            'jrsfqzys': '',
+            'jrsfqzfy': '',
+            'sfyqjzgc': '',
+            # 是否申领杭州健康码
+            'sfsqhzjkk': '1',
+            # 杭州健康吗颜色，1:绿色 2:红色 3:黄色
+            'sqhzjkkys': '1',
+            'gwszgzcs': '',
+            'szgj': '',
+            'fxyy': '',
+            'jcjg': '',
+            # uid每个用户不一致
+            'uid': new_uid,
+            # id每个用户不一致
+            'id': new_id,
+            # 日期
+            'date': get_date(),
+            'created': round(time.time()),
+            'szsqsfybl': '0',
+            'sfygtjzzfj': '0',
+            'gtjzzfjsj': '',
+            'gwszdd': '',
+            'szgjcs': '',
+            'ismoved': '0',  # 位置变化为1，不变为0
+            'zgfx14rfhsj': '',
+            'jrdqjcqk': '',
+            'jcwhryfs': '',
+            'jchbryfs': '',
+            'xjzd': '',
+            'sfsfbh': '0',
+            'jhfjrq': '',
+            'jhfjjtgj': '',
+            'jhfjhbcc': '',
+            'jhfjsftjwh': '0',
+            'jhfjsftjhb': '0',
+            'szsqsfybl': '0',
+            'gwszgz': '',
+            'campus': '紫金港校区',  # 紫金港校区 玉泉校区 西溪校区 华家池校区 之江校区 海宁校区 舟山校区 宁波校区 工程师学院 杭州国际科创中心 其他
+            # 👇-----2022.5.7日修改-----👇
+            'verifyCode': code,
+            # 👆-----2022.5.7日修改-----👆
+        }
+        data.update(verify_code)
+        response = self.sess.post('https://healthreport.zju.edu.cn/ncov/wap/default/save', data=data,
+                                    headers=self.headers)
+        return response.json()
+    
     def run(self):
         print("正在为{}健康打卡".format(self.username))
         if self.delay_run:
             # 确保定时脚本执行时间不太一致
             time.sleep(random.randint(10, 100))
-        try:
-            self.login()
-            # 拿取eai-sess的cookies信息
-            self.sess.get(self.REDIRECT_URL)
-            # location = get_ip_location()
-            # print(location)
-            location = {'info': 'LOCATE_SUCCESS',
-                        'status': 1, 'lng': self.lng, 'lat': self.lat}
-            geo_info = self.get_geo_info(location)
-            # print(geo_info)
-            res = self.take_in(geo_info)
-            print(res)
-        except requests.exceptions.ConnectionError:
-            # reraise as KubeException, but log stacktrace.
-            print("打卡失败,请检查github服务器网络状态")
+        try_count=0
+        while True:
+            if try_count>10:
+                print("已经尝试你妈的10次了，还不对，你退群吧")
+                return
+            try:
+                self.login()
+                # 拿取eai-sess的cookies信息
+                self.sess.get(self.REDIRECT_URL)
+                # location = get_ip_location()
+                # print(location)
+                location = {'info': 'LOCATE_SUCCESS',
+                            'status': 1, 'lng': self.lng, 'lat': self.lat}
+                geo_info = self.get_geo_info(location)
+                # print(geo_info)
+                res = self.take_in(geo_info)
+                print(res)
+                return
+            except requests.exceptions.ConnectionError:
+                # reraise as KubeException, but log stacktrace.
+                print("打卡失败,请检查服务器网络状态")
+            except Exception as e:
+                print(e)
+                print("遇到错误，尝试重试")
+            print("重试中...",try_count)
+            try_count+=1
+
 
 
 if __name__ == '__main__':
