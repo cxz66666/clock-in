@@ -11,4 +11,4 @@ COPY . .
 RUN  cp /usr/share/zoneinfo/Asia/Shanghai  /etc/localtime
 RUN  echo 'Asia/Shanghai' > /etc/timezone
 
-CMD [ "python", "./main.py" ]
+CMD [ "python","-u","./main.py" ]
