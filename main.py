@@ -342,8 +342,10 @@ class HealthCheckInHelper(ZJULogin):
             'gwszgz': '',
             'campus': '紫金港校区',  # 紫金港校区 玉泉校区 西溪校区 华家池校区 之江校区 海宁校区 舟山校区 宁波校区 工程师学院 杭州国际科创中心 其他
             # 👇-----2022.5.7日修改-----👇
-            'verifyCode': code,
+            #'verifyCode': code,
             # 👆-----2022.5.7日修改-----👆
+            # 2022.07.05
+            'internship': 3, # 今日是否进行实习或实践
         }
         data.update(verify_code)
         response = self.sess.post('https://healthreport.zju.edu.cn/ncov/wap/default/save', data=data,
