@@ -392,6 +392,7 @@ if __name__ == '__main__':
     password = os.getenv("password")
     s = HealthCheckInHelper(account, password, delay_run=True)
     schedule.every().day.at("06:04").do(s.run)
+    s.run()
     while True:
         try:
             schedule.run_pending()
