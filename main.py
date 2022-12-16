@@ -157,33 +157,18 @@ class HealthCheckInHelper(ZJULogin):
         }
 
         params = (
-            ('key', '729923f88542d91590470f613adb27b5'),
-            ('callback', 'jsonp_859544_'),
-            ('platform', 'JS'),
-            ('logversion', '2.0'),
-            ('appname', 'https://healthreport.zju.edu.cn/ncov/wap/default/index'),
-            ('csid', '17F714D6-756D-49E4-96F2-B31F04B14A5A'),
-            ('sdkversion', '1.4.16'),
+            ('key', 'ea56069562909fadcc3c7c24e134b92e'),
         )
         response = self.sess.get(
-            'https://webapi.amap.com/maps/ipLocation?key=729923f88542d91590470f613adb27b5&callback=jsonp_859544_&platform=JS&logversion=2.0&appname=https%3A%2F%2Fhealthreport.zju.edu.cn%2Fncov%2Fwap%2Fdefault%2Findex&csid=17F714D6-756D-49E4-96F2-B31F04B14A5A&sdkversion=1.4.16',
+            'https://webapi.amap.com/maps/ipLocation',
             headers=headers, params=params)
         return take_out_json(response.text)
 
     def get_geo_info(self, location: dict):
         params = (
-            ('key', '729923f88542d91590470f613adb27b5'),
-            ('s', 'rsv3'),
-            ('language', 'zh_cn'),
+            ('key', 'ea56069562909fadcc3c7c24e134b92e'),
             ('location', '{lng},{lat}'.format(
                 lng=location.get("lng"), lat=location.get("lat"))),
-            ('extensions', 'base'),
-            ('callback', 'jsonp_607701_'),
-            ('platform', 'JS'),
-            ('logversion', '2.0'),
-            ('appname', 'https://healthreport.zju.edu.cn/ncov/wap/default/index'),
-            ('csid', '63157A4E-D820-44E1-B032-A77418183A4C'),
-            ('sdkversion', '1.4.16'),
         )
 
         response = self.sess.get(
