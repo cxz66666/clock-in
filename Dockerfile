@@ -1,4 +1,4 @@
-FROM python:3.8
+FROM registry.cn-hangzhou.aliyuncs.com/raynor/python3.8:latest
 
 WORKDIR /app
 RUN apt-get update && apt-get install libgl1 -y
